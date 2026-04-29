@@ -10,7 +10,6 @@ def _insertDatetime(data : DataFrame) -> DataFrame :
     
     data["Datetime"] = to_datetime(data["Date"] + " " + data["Time"], format=r"%d/%m/%Y %H:%M:%S")
     data = data.set_index("Datetime").sort_index()
-
     return data
 
 def _dropDate(data : DataFrame) -> DataFrame :
@@ -35,9 +34,17 @@ def _convertDateTime(data : DataFrame) -> DataFrame :
 
 def _convertDtypeToFloat(data : DataFrame) -> DataFrame :
     'Converti les données en type numpy f64. Les données manquantes sont converties en NaN.'
-    for key, col in Columns.__dict__.items() :
-        if not key.startswith("__") :
-            data[col] = to_numeric(data[col], errors="coerce")
+    'Retourne le dataset si les types sont déjà correct.'
+    isFloat64 = True
+    for dtype in data.dtypes :
+        if dtype != "float64" :
+            isFloat64 = False
+    
+    if isFloat64 :
+        return data
+
+    for col in data.columns :
+        data[col] = to_numeric(data[col], errors="coerce")
     return data
 
 def cleanData(data : DataFrame) -> DataFrame :
